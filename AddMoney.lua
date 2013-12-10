@@ -3,6 +3,7 @@
 -- @author  Grisu118
 -- @date  03/12/2013
 -- @version 1.0
+-- @Descripion: Readme you can find there: https://github.com/Grisu118/Scripts
 -- Copyright (C) Grisu118, All Rights Reserved.
 -- free for noncommerical-usage
 
