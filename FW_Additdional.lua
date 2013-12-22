@@ -4,6 +4,7 @@
 -- @date  11/04/2013
 -- @version 0.9
 -- @Descripion: Readme you can find there: https://github.com/Grisu118/Scripts
+-- @web: http://grisu118.ch or http://vertexdezign.de
 -- Copyright (C) Grisu118, All Rights Reserved.
 -- free for noncommerical-usage
 

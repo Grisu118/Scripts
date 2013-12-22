@@ -24,8 +24,11 @@ To use it, you have to add the follow parameter to the vehicle.xml: `<incomePerH
 <a name="FWAdditional">
 ### FW_Additional.lua
 
-TODO
+This script is an addition for Fire Department Modifications.
 
+With V0.9 it is possible to make the crew (exclude the driver) not visible when nobody is driving the car. Without this Script it is only possible to have a Crew allways inside or when you are in Indoor-Cam the driver is visible.
+
+V1.0 would be also a drl Script inside. 
 
 -------
 
