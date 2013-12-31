@@ -76,14 +76,14 @@ end;
 function FW_Additdional:writeStream(streamId, connection)
 end;
 
-function FW_Additdional:loadFromAttributesAndNodes(xmlFile, key, resetVehicles)
+--[[function FW_Additdional:loadFromAttributesAndNodes(xmlFile, key, resetVehicles)
 	local fillLevel = getXMLFloat(xmlFile, key .. "#fillLevel");
 	if fillLevel ~= nil then
 -- TODO Set Fuel indicator from xml while Loading
 	end;
 	
 	return BaseMission.VEHICLE_LOAD_OK;
-end;
+end;]]
 
 function FW_Additdional:mouseEvent(posX, posY, isDown, isUp, button)
 end;
