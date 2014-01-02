@@ -2,7 +2,7 @@
 -- 
 --
 -- @author Grisu118
--- @version v0.9
+-- @version v0.91
 -- @date 31.12.13
 -- @Descripion: Readme you can find there: https://github.com/Grisu118/Scripts
 -- @web: http://grisu118.ch or http://vertexdezign.de
@@ -25,77 +25,91 @@ end;
   
 function waterCannon:load(xmlFile)
   
-      assert(self.setIsTurnedOn == nil, "waterCannon needs to be the first specialization which implements setIsTurnedOn");
-      self.setIsTurnedOn = waterCannon.setIsTurnedOn;
-      self.getIsTurnedOnAllowed = waterCannon.getIsTurnedOnAllowed;
+	assert(self.setIsTurnedOn == nil, "waterCannon needs to be the first specialization which implements setIsTurnedOn");
+	self.setIsTurnedOn = waterCannon.setIsTurnedOn;
+	self.getIsTurnedOnAllowed = waterCannon.getIsTurnedOnAllowed;
   
-      self.CannonLitersPerSecond = {};
-      local i=0;
-      while true do
-          local key = string.format("vehicle.CannonUsages.CannonUsage(%d)", i);
-          if not hasXMLProperty(xmlFile, key) then
-              break;
-          end;
-          local fillType = getXMLString(xmlFile, key.. "#fillType");
-          local litersPerSecond = getXMLFloat(xmlFile, key.. "#litersPerSecond");
-          if fillType ~= nil and litersPerSecond ~= nil then
-              local fillTypeInt = Fillable.fillTypeNameToInt[fillType];
-              if fillTypeInt ~= nil then
-                  self.CannonLitersPerSecond[fillTypeInt] = litersPerSecond;
-                  if self.defaultCannonLitersPerSecond == nil then
-                      self.defaultCannonLitersPerSecond = litersPerSecond;
-                  end;
-              else
-                  print("Warning: Invalid Cannon usage fill type '"..fillType.."' in '" .. self.configFileName.. "'");
-              end;
-          end;
-          i = i+1;
-      end;
-      if self.defaultCannonLitersPerSecond == nil then
-          print("Warning: No Cannon usage specified for '" .. self.configFileName.. "'. This waterCannon will not use any Cannon.");
-          self.defaultCannonLitersPerSecond = 0;
-      end;
+	self.CannonLitersPerSecond = {};
+	local i=0;
+	while true do
+		local key = string.format("vehicle.CannonUsages.CannonUsage(%d)", i);
+		if not hasXMLProperty(xmlFile, key) then
+			break;
+		end;
+		local fillType = getXMLString(xmlFile, key.. "#fillType");
+		local litersPerSecond = getXMLFloat(xmlFile, key.. "#litersPerSecond");
+		if fillType ~= nil and litersPerSecond ~= nil then
+			local fillTypeInt = Fillable.fillTypeNameToInt[fillType];
+			if fillTypeInt ~= nil then
+				self.CannonLitersPerSecond[fillTypeInt] = litersPerSecond;
+				if self.defaultCannonLitersPerSecond == nil then
+					self.defaultCannonLitersPerSecond = litersPerSecond;
+				end;
+			else
+				print("Warning: Invalid Cannon usage fill type '"..fillType.."' in '" .. self.configFileName.. "'");
+			end;
+		end;
+		i = i+1;
+	end;
+	if self.defaultCannonLitersPerSecond == nil then
+		print("Warning: No Cannon usage specified for '" .. self.configFileName.. "'. This waterCannon will not use any Cannon.");
+		self.defaultCannonLitersPerSecond = 0;
+	end;
   
-      self.CannonValves = {};
+	self.CannonValves = {};
   
-      if self.isClient then
-          local psFile = getXMLString(xmlFile, "vehicle.CannonParticleSystem#file");
-          if psFile ~= nil then
-           local i=0;
-              while true do
-                  local baseName = string.format("vehicle.CannonValves.CannonValve(%d)", i);
-                  local node = getXMLString(xmlFile, baseName.. "#index");
-                  if node == nil then
-                      break;
-                  end;
-                  node = Utils.indexToObject(self.components, node);
-                  if node ~= nil then
-                      local CannonValve = {};
-                      CannonValve.particleSystems = {};
-                      Utils.loadParticleSystem(xmlFile, CannonValve.particleSystems, "vehicle.CannonParticleSystem", node, false, nil, self.baseDirectory);
-                      table.insert(self.CannonValves, CannonValve);
-                  end;
-                  i = i+1;
-              end;
-          end;
+	if self.isClient then
+		local psFile = getXMLString(xmlFile, "vehicle.CannonParticleSystem#file");
+		if psFile ~= nil then
+			local i=0;
+			while true do
+				local baseName = string.format("vehicle.CannonValves.CannonValve(%d)", i);
+				local node = getXMLString(xmlFile, baseName.. "#index");
+				if node == nil then
+					break;
+				end;
+				node = Utils.indexToObject(self.components, node);
+				if node ~= nil then
+					local CannonValve = {};
+					CannonValve.particleSystems = {};
+					Utils.loadParticleSystem(xmlFile, CannonValve.particleSystems, "vehicle.CannonParticleSystem", node, false, nil, self.baseDirectory);
+					table.insert(self.CannonValves, CannonValve);
+				end;
+				i = i+1;
+			end;
+		end;
   
-          local CannonSound = getXMLString(xmlFile, "vehicle.CannonSound#file");
-          if CannonSound ~= nil and CannonSound ~= "" then
-              CannonSound = Utils.getFilename(CannonSound, self.baseDirectory);
-              self.CannonSound = createSample("CannonSound");
-              self.CannonSoundEnabled = false;
-              loadSample(self.CannonSound, CannonSound, false);
-              self.CannonSoundPitchOffset = Utils.getNoNil(getXMLFloat(xmlFile, "vehicle.CannonSound#pitchOffset"), 1);
-              self.CannonSoundVolume = Utils.getNoNil(getXMLFloat(xmlFile, "vehicle.CannonSound#volume"), 1);
-          end;
-      end;
+		  
+		local cannonSound = getXMLString(xmlFile, "vehicle.CannonSound#file");
+		if cannonSound ~= nil and cannonSound ~= "" then
+			cannonSound = Utils.getFilename(cannonSound, self.baseDirectory);
+			self.cannonSound = createSample("cannonSound");
+			loadSample(self.cannonSound, cannonSound, false);
+			self.cannonSoundPitchOffset = Utils.getNoNil(getXMLFloat(xmlFile, "vehicle.CannonSound#pitchOffset"), 1.0);
+			self.cannonSoundPitchScale = Utils.getNoNil(getXMLFloat(xmlFile, "vehicle.CannonSound#pitchScale"), 0.05);
+			self.cannonSoundPitchMax = Utils.getNoNil(getXMLFloat(xmlFile, "vehicle.CannonSound#pitchMax"), 2.0);
+			self.cannonSoundVolume = Utils.getNoNil(getXMLFloat(xmlFile, "vehicle.CannonSound#volume"), 1.0);
+    
+			self.cannonSoundEnabled = false;
+    
+			self.cannonSound3DVolume = Utils.getNoNil(getXMLFloat(xmlFile, "vehicle.CannonSound#volume3D"), self.cannonSoundVolume);
+			self.cannonSound3DInnerRadius = Utils.getNoNil(getXMLFloat(xmlFile, "vehicle.CannonSound#innerRadius"), 10);
+			self.cannonSound3DRadius = Utils.getNoNil(getXMLFloat(xmlFile, "vehicle.CannonSound#radius"), 50);
+    
+    
+			self.cannonSound3D = createAudioSource("cannonSound3D", cannonSound, self.cannonSound3DRadius, self.cannonSound3DInnerRadius, self.cannonSound3DVolume, 0);
+			link(self.components[1].node, self.cannonSound3D);
+			setVisibility(self.cannonSound3D, false);
+   
+		end;		  
+	end;
 	  
-	  self.isPumpandRoll = Utils.getNoNil(getXMLBool(xmlFile, "vehicle.CannonUsages#isPumpandRoll"),false);
+	self.isPumpandRoll = Utils.getNoNil(getXMLBool(xmlFile, "vehicle.CannonUsages#isPumpandRoll"),false);
 
   
-      self.isTurnedOn = false;
-      self.speedViolationMaxTime = 1000;
-      self.speedViolationTimer = self.speedViolationMaxTime;
+	self.isTurnedOn = false;
+	self.speedViolationMaxTime = 1000;
+	self.speedViolationTimer = self.speedViolationMaxTime;
 end;
   
 function waterCannon:delete()
@@ -105,8 +119,8 @@ function waterCannon:delete()
           Utils.deleteParticleSystem(CannonValve.particleSystems);
       end;
   
-      if self.CannonSound ~= nil then
-          delete(self.CannonSound);
+      if self.cannonSound ~= nil then
+          delete(self.cannonSound);
       end;
 end;
   
@@ -154,7 +168,6 @@ function waterCannon:updateTick(dt)
 				  		
         else
             self.speedViolationTimer = self.speedViolationMaxTime;
-			stopsoundGrisu = false;
         end;
 			
 		if self.isServer then
@@ -167,7 +180,6 @@ function waterCannon:updateTick(dt)
 				
 				if not self.capacity == 0 or not self:getIsHired() then
 					if self.fillLevel > 0 then
-						hasCannon = true;
 						self:setFillLevel(self.fillLevel - usage, self.currentFillType);
 						if not self.isPumpandRoll then
 							for k,wheel in pairs(self.wheels) do
@@ -180,25 +192,38 @@ function waterCannon:updateTick(dt)
 		end;
 	end;
   
---      if self:getIsActive() then
-          if self.isTurnedOn then
-				
-				if self.isClient then
-                  if not self.CannonSoundEnabled and self:getIsActiveForSound() then
-					  playSample(self.CannonSound, 0, self.CannonSoundVolume, 0);
-                      setSamplePitch(self.CannonSound, self.CannonSoundPitchOffset);
-                      self.CannonSoundEnabled = true;
-					  
-                  end;
-              end;
+--	if self:getIsActive() then
+		if self.isTurnedOn then
+			if self.isClient then
+				if not self.CannonSoundEnabled and self:getIsActiveForSound() then
+					local alpha = 0.9;
+					local roundPerMinute = self.lastRoundPerMinute*alpha + (1-alpha)*(self.motor.lastMotorRpm-self.motor.minRpm);
+					self.lastRoundPerMinute = roundPerMinute;
+					local roundPerSecond = roundPerMinute / 60;
+					
+--					playSample(self.cannonSound, 0, self.cannonSoundVolume, 0);
+					if self.cannonSound3D ~= nil then
+						setVisibility(self.cannonSound3D, true);
+					end;
+					local cannonSoundPitch = math.min(self.cannonSoundPitchOffset + self.cannonSoundPitchScale*math.abs(roundPerSecond), self.cannonSoundPitchMax)
+					setSamplePitch(self.cannonSound, self.cannonSoundPitch);
+					if self.cannonSound3D ~= nil then
+						setSamplePitch(getAudioSourceSample(self.cannonSound3D), cannonSoundPitch);
+					end;
+					self.CannonSoundEnabled = true;
+				end;
+			end;
   
-              if self.fillLevel <= 0 and self.capacity ~= 0 then
-                  self:setIsTurnedOn(false, true);
-              end;
-          else
-              self.speedViolationTimer = self.speedViolationMaxTime;
-          end;
---      end;
+			if self.fillLevel <= 0 and self.capacity ~= 0 then
+				self:setIsTurnedOn(false, true);
+			end;
+		else
+			self.speedViolationTimer = self.speedViolationMaxTime;
+			if self.cannonSound3D ~= nil then
+				setVisibility(self.cannonSound3D, false);
+			end;
+		end;
+--	end;
   
 
 end;
@@ -232,6 +257,9 @@ function waterCannon:onDetach()
 end;
   
 function waterCannon:onLeave()
+	if self.CannonSoundEnabled then
+		stopSample(self.cannonSound);
+	end;
 --[[      if self.deactivateOnLeave then
           waterCannon.onDeactivate(self);
       else
@@ -246,8 +274,12 @@ end;
   
 function waterCannon:onDeactivateSounds()
 	if self.CannonSoundEnabled then
-		stopSample(self.CannonSound);
+		stopSample(self.cannonSound);
+		
 		self.CannonSoundEnabled = false;
+	end;
+	if self.cannonSound3D ~= nil then
+		setVisibility(self.cannonSound3D, false);
 	end;
 end;
   
@@ -268,7 +300,7 @@ function waterCannon:setIsTurnedOn(isTurnedOn, noEventSend)
 				end;
   
 				if not self.isTurnedOn and self.CannonSoundEnabled then
-					stopSample(self.CannonSound);
+					stopSample(self.cannonSound);
 					self.CannonSoundEnabled = false;
 				end;
 			end;
