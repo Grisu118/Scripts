@@ -3,7 +3,7 @@
 --
 -- @author Grisu118
 -- @version v0.91
--- @date 31.12.13
+-- @date 02.01.14
 -- @Descripion: Readme you can find there: https://github.com/Grisu118/Scripts
 -- @web: http://grisu118.ch or http://vertexdezign.de
 -- free for noncommerical-usage
@@ -124,29 +124,29 @@ function waterCannon:delete()
       end;
 end;
   
- function waterCannon:readStream(streamId, connection)
-      local turnedOn = streamReadBool(streamId);
+function waterCannon:readStream(streamId, connection)
+	local turnedOn = streamReadBool(streamId);
 
-      self:setIsTurnedOn(turnedOn, true);
+	self:setIsTurnedOn(turnedOn, true);
 
-  end;
+end;
   
-  function waterCannon:writeStream(streamId, connection)
-      streamWriteBool(streamId, self.isTurnedOn);
+function waterCannon:writeStream(streamId, connection)
+	streamWriteBool(streamId, self.isTurnedOn);
 
-  end;
+end;
   
-  function waterCannon:readUpdateStream(streamId, timestamp, connection)
-  end;
+function waterCannon:readUpdateStream(streamId, timestamp, connection)
+end;
   
-  function waterCannon:writeUpdateStream(streamId, connection, dirtyMask)
-  end;
+function waterCannon:writeUpdateStream(streamId, connection, dirtyMask)
+end;
   
-  function waterCannon:mouseEvent(posX, posY, isDown, isUp, button)
-  end;
+function waterCannon:mouseEvent(posX, posY, isDown, isUp, button)
+end;
   
-  function waterCannon:keyEvent(unicode, sym, modifier, isDown)
-  end;
+function waterCannon:keyEvent(unicode, sym, modifier, isDown)
+end;
   
 function waterCannon:update(dt)
   
