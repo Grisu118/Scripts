@@ -2,8 +2,8 @@
 -- 
 --
 -- @author Grisu118
+-- @date 02/01/14
 -- @version v0.91
--- @date 02.01.14
 -- @Descripion: Readme you can find there: https://github.com/Grisu118/Scripts
 -- @web: http://grisu118.ch or http://vertexdezign.de
 -- free for noncommerical-usage
@@ -153,7 +153,11 @@ function waterCannon:update(dt)
 	if self.isClient then
 		if self:getIsActiveForInput() then
 			if InputBinding.hasEvent(InputBinding.WATERCANNON_SWITCH) then
-				self:setIsTurnedOn(not self.isTurnedOn);
+				if pump.isTurnedOn then
+					self:setIsTurnedOn(not self.isTurnedOn);
+				else
+					g_currentMission:addWarning(g_i18n:getText("First_turn_on_pump"), "2", tBinding.getKeyNamesOfDigitalAction(InputBinding.PUMP_SWITCH)), 0.07+0.022, 0.019+0.029);
+				end;
 			end;
 		end;
 	end;
