@@ -2,7 +2,7 @@
 --
 -- @author  Grisu118
 -- @date  03/02/2014
--- @version v0.2
+-- @version v0.3
 -- @Descripion: Readme you can find there: https://github.com/Grisu118/Scripts
 -- @web: http://grisu118.ch or http://vertexdezign.de
 -- Copyright (C) Grisu118, All Rights Reserved.
@@ -54,12 +54,42 @@ function Pump:load(xmlFile)
 	for j = 0, self.count, 1	do
 		setVisibility(self.fuelIndicators[j], false);
 	end;
-	
+	--Pumpe
 	Pump.isTurnedOn = false;
+	
+	--Sound
+	if self.isClient then
+		local pumpSound = getXMLString(xmlFile, "vehicle.pumpSound#file");
+		if pumpSound ~= nil and pumpSound ~= "" then
+			pumpSound = Utils.getFilename(pumpSound, self.baseDirectory);
+			self.pumpSound = createSample("pumpSound");
+			loadSample(self.pumpSound, pumpSound, false);
+			self.pumpSoundPitchOffset = Utils.getNoNil(getXMLFloat(xmlFile, "vehicle.pumpSound#pitchOffset"), 1.0);
+			self.pumpSoundPitchScale = Utils.getNoNil(getXMLFloat(xmlFile, "vehicle.pumpSound#pitchScale"), 0.05);
+			self.pumpSoundPitchMax = Utils.getNoNil(getXMLFloat(xmlFile, "vehicle.pumpSound#pitchMax"), 2.0);
+			self.pumpSoundVolume = Utils.getNoNil(getXMLFloat(xmlFile, "vehicle.pumpSound#volume"), 1.0);
+    
+			self.pumpSoundEnabled = false;
+    
+			self.pumpSound3DVolume = Utils.getNoNil(getXMLFloat(xmlFile, "vehicle.pumpSound#volume3D"), self.pumpSoundVolume);
+			self.pumpSound3DInnerRadius = Utils.getNoNil(getXMLFloat(xmlFile, "vehicle.pumpSound#innerRadius"), 10);
+			self.pumpSound3DRadius = Utils.getNoNil(getXMLFloat(xmlFile, "vehicle.pumpSound#radius"), 50);
+    
+    
+			self.pumpSound3D = createAudioSource("pumpSound3D", pumpSound, self.pumpSound3DRadius, self.pumpSound3DInnerRadius, self.pumpSound3DVolume, 0);
+			link(self.components[1].node, self.pumpSound3D);
+			setVisibility(self.pumpSound3D, false);
+   
+		end;		  
+	end;
+	
 	
 end;
 
 function Pump:delete()
+	if self.pumpSound3D ~= nil then
+          delete(self.pumpSound3D);
+	end;
 end;
 function Pump:readStream(streamId, connection)
 end;
@@ -105,6 +135,24 @@ function Pump:updateTick(dt)
 				for j = lamps + 1, self.count, 1 do
 					setVisibility(self.fuelIndicators[j], false);
 				end; 
+			end;
+		end;
+		
+		if Pump.isTurnedOn and self.isClient then
+			if not self.pumpSoundEnabled and self:getIsActiveForSound() then
+				local alpha = 0.9;
+				local roundPerMinute = self.lastRoundPerMinute*alpha + (1-alpha)*(self.motor.lastMotorRpm-self.motor.minRpm);
+				self.lastRoundPerMinute = roundPerMinute;
+				local roundPerSecond = roundPerMinute / 60;
+				if self.pumpSound3D ~= nil then
+					setVisibility(self.pumpSound3D, true);
+				end;
+				local pumpSoundPitch = math.min(self.pumpSoundPitchOffset + self.pumpSoundPitchScale*math.abs(roundPerSecond), self.pumpSoundPitchMax)
+				--setSamplePitch(self.pumpSound, self.pumpSoundPitch);
+				if self.pumpSound3D ~= nil then
+					setSamplePitch(getAudioSourceSample(self.pumpSound3D), pumpSoundPitch);
+				end;
+				self.pumpSoundEnabled = true;
 			end;
 		end;
 		
