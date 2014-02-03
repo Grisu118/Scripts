@@ -1,4 +1,4 @@
--- waterCannon
+-- WaterCannon
 -- 
 --
 -- @author Grisu118
@@ -10,24 +10,27 @@
 
   
 source("dataS/scripts/vehicles/specializations/SetTurnedOnEvent.lua");
-waterCannon = {};
+WaterCannon = {};
   
-function waterCannon.prerequisitesPresent(specializations)
+function WaterCannon.prerequisitesPresent(specializations)
 	if not SpecializationUtil.hasSpecialization(Fillable, specializations) then
 		print("Warning: Specialization WaterCannon needs the specialization Fillable.");
 	end;
 	if not SpecializationUtil.hasSpecialization(WaterTrailer, specializations) then
 		print("Warning: Specialization WaterCannon needs the specialization WaterTrailer.");
 	end;
+	if not SpecializationUtil.hasSpecialization(Pump, specializations) then
+		print("Warning: Specialization WaterCannon needs the specialization Pump.");
+	end;
 
-	return SpecializationUtil.hasSpecialization(Fillable, specializations) and SpecializationUtil.hasSpecialization(WaterTrailer, specializations);
+	return SpecializationUtil.hasSpecialization(Fillable, specializations) and SpecializationUtil.hasSpecialization(WaterTrailer, specializations) and SpecializationUtil.hasSpecialization(Pump, specializations);
 end;
   
-function waterCannon:load(xmlFile)
+function WaterCannon:load(xmlFile)
   
-	assert(self.setIsTurnedOn == nil, "waterCannon needs to be the first specialization which implements setIsTurnedOn");
-	self.setIsTurnedOn = waterCannon.setIsTurnedOn;
-	self.getIsTurnedOnAllowed = waterCannon.getIsTurnedOnAllowed;
+	assert(self.setIsTurnedOn == nil, "WaterCannon needs to be the first specialization which implements setIsTurnedOn");
+	self.setIsTurnedOn = WaterCannon.setIsTurnedOn;
+	self.getIsTurnedOnAllowed = WaterCannon.getIsTurnedOnAllowed;
   
 	self.CannonLitersPerSecond = {};
 	local i=0;
@@ -52,7 +55,7 @@ function waterCannon:load(xmlFile)
 		i = i+1;
 	end;
 	if self.defaultCannonLitersPerSecond == nil then
-		print("Warning: No Cannon usage specified for '" .. self.configFileName.. "'. This waterCannon will not use any Cannon.");
+		print("Warning: No Cannon usage specified for '" .. self.configFileName.. "'. This WaterCannon will not use any Cannon.");
 		self.defaultCannonLitersPerSecond = 0;
 	end;
   
@@ -112,7 +115,7 @@ function waterCannon:load(xmlFile)
 	self.speedViolationTimer = self.speedViolationMaxTime;
 end;
   
-function waterCannon:delete()
+function WaterCannon:delete()
   
   
       for k,CannonValve in pairs(self.CannonValves) do
@@ -124,47 +127,48 @@ function waterCannon:delete()
       end;
 end;
   
-function waterCannon:readStream(streamId, connection)
+function WaterCannon:readStream(streamId, connection)
 	local turnedOn = streamReadBool(streamId);
 
 	self:setIsTurnedOn(turnedOn, true);
 
 end;
   
-function waterCannon:writeStream(streamId, connection)
+function WaterCannon:writeStream(streamId, connection)
 	streamWriteBool(streamId, self.isTurnedOn);
 
 end;
   
-function waterCannon:readUpdateStream(streamId, timestamp, connection)
+function WaterCannon:readUpdateStream(streamId, timestamp, connection)
 end;
   
-function waterCannon:writeUpdateStream(streamId, connection, dirtyMask)
+function WaterCannon:writeUpdateStream(streamId, connection, dirtyMask)
 end;
   
-function waterCannon:mouseEvent(posX, posY, isDown, isUp, button)
+function WaterCannon:mouseEvent(posX, posY, isDown, isUp, button)
 end;
   
-function waterCannon:keyEvent(unicode, sym, modifier, isDown)
+function WaterCannon:keyEvent(unicode, sym, modifier, isDown)
 end;
   
-function waterCannon:update(dt)
+function WaterCannon:update(dt)
   
 	if self.isClient then
 		if self:getIsActiveForInput() then
 			if InputBinding.hasEvent(InputBinding.WATERCANNON_SWITCH) then
-				if pump.isTurnedOn then
+				if Pump.isTurnedOn then
 					self:setIsTurnedOn(not self.isTurnedOn);
-				else
-					g_currentMission:addWarning(g_i18n:getText("First_turn_on_pump"), "2", tBinding.getKeyNamesOfDigitalAction(InputBinding.PUMP_SWITCH)), 0.07+0.022, 0.019+0.029);
 				end;
+			end;
+			if not Pump.isTurnedOn then
+				self:setIsTurnedOn(false);
 			end;
 		end;
 	end;
   
 end;
   
-function waterCannon:updateTick(dt)
+function WaterCannon:updateTick(dt)
 	if self.isTurnedOn then
 			
 		if self:doCheckSpeedLimit() and self.lastSpeed*3600 > 90 then
@@ -232,51 +236,53 @@ function waterCannon:updateTick(dt)
 
 end;
   
-function waterCannon:draw()
+function WaterCannon:draw()
+ 
+	if self.isClient then
+		if self.fillLevel <= 0 and self.capacity ~= 0 then
+			g_currentMission:addExtraPrintText(g_i18n:getText("FirstFillTheTool"));
+		end;
   
-      if self.isClient then
-          if self.fillLevel <= 0 and self.capacity ~= 0 then
-              --g_currentMission:addExtraPrintText(g_i18n:getText("FirstFillTheTool"));
-          end;
-  
-          if self.isTurnedOn then
+		if self.isTurnedOn then
 				
-			g_currentMission:addHelpButtonText(string.format(g_i18n:getText("turn_off_WATERCANNON"), self.typeDesc), InputBinding.WATERCANNON_SWITCH);
-          else
-            g_currentMission:addHelpButtonText(string.format(g_i18n:getText("turn_on_WATERCANNON"), self.typeDesc), InputBinding.WATERCANNON_SWITCH);
-          end;
-  
-          --[[if math.abs(self.speedViolationTimer - self.speedViolationMaxTime) > 2 then
-              g_currentMission:addWarning(g_i18n:getText("Dont_drive_to_fast") .. "\n" .. string.format(g_i18n:getText("Cruise_control_levelN"), "2", tBinding.getKeyNamesOfDigitalAction(InputBinding.SPEED_LEVEL2)), 0.07+0.022, 0.019+0.029);
-         end;]]
-      end;
+			g_currentMission:addHelpButtonText(string.format(g_i18n:getText("turn_off_WaterCannon"), self.typeDesc), InputBinding.WATERCANNON_SWITCH);
+		else
+			g_currentMission:addHelpButtonText(string.format(g_i18n:getText("turn_on_WaterCannon"), self.typeDesc), InputBinding.WATERCANNON_SWITCH);
+		end;
+		
+		--TODO Make that the Warning is showing longer then half second
+		if InputBinding.hasEvent(InputBinding.WATERCANNON_SWITCH) and not Pump.isTurnedOn then
+			g_currentMission:addWarning(g_i18n:getText("First_turn_on_Pump") .. "/n" .. string.format(InputBinding.getKeyNamesOfDigitalAction(InputBinding.Pump_SWITCH)), 0.07+0.022, 0.019+0.029);
+		end;
+	end;
+
 end;
   
-function waterCannon:onDetach()
+function WaterCannon:onDetach()
       if self.deactivateOnDetach then
-          waterCannon.onDeactivate(self);
+          WaterCannon.onDeactivate(self);
       else
-          waterCannon.onDeactivateSounds(self);
+          WaterCannon.onDeactivateSounds(self);
       end;
 end;
   
-function waterCannon:onLeave()
+function WaterCannon:onLeave()
 	if self.CannonSoundEnabled then
 		stopSample(self.cannonSound);
 	end;
 --[[      if self.deactivateOnLeave then
-          waterCannon.onDeactivate(self);
+          WaterCannon.onDeactivate(self);
       else
-          waterCannon.onDeactivateSounds(self);
+          WaterCannon.onDeactivateSounds(self);
       end;]]
 end;
-function waterCannon:onDeactivate()
+function WaterCannon:onDeactivate()
 	self.speedViolationTimer = self.speedViolationMaxTime;
 	self:setIsTurnedOn(false, true)
-	waterCannon.onDeactivateSounds(self);
+	WaterCannon.onDeactivateSounds(self);
 end;
   
-function waterCannon:onDeactivateSounds()
+function WaterCannon:onDeactivateSounds()
 	if self.CannonSoundEnabled then
 		stopSample(self.cannonSound);
 		
@@ -287,13 +293,13 @@ function waterCannon:onDeactivateSounds()
 	end;
 end;
   
-function waterCannon:getIsTurnedOnAllowed(isTurnedOn)
+function WaterCannon:getIsTurnedOnAllowed(isTurnedOn)
 	if not isTurnedOn or self.fillLevel > 0 or self.capacity == 0 then
 		return true;
 	end;
 end;
   
-function waterCannon:setIsTurnedOn(isTurnedOn, noEventSend)
+function WaterCannon:setIsTurnedOn(isTurnedOn, noEventSend)
 	if isTurnedOn ~= self.isTurnedOn then
 		if self:getIsTurnedOnAllowed(isTurnedOn) then
 			SetTurnedOnEvent.sendEvent(self, isTurnedOn, noEventSend)

@@ -18,19 +18,19 @@
 ]]
 
 
-pump = {};
+Pump = {};
 
-function pump.prerequisitesPresent(specializations)
+function Pump.prerequisitesPresent(specializations)
 	if not SpecializationUtil.hasSpecialization(Motorized, specializations) then
-		print("Warning: Specialization pump needs the specialization Motorized.");
+		print("Warning: Specialization Pump needs the specialization Motorized.");
 	end;
 	if not SpecializationUtil.hasSpecialization(Fillable, specializations) then
-		print("Warning: Specialization pump needs the specialization Fillable.");
+		print("Warning: Specialization Pump needs the specialization Fillable.");
 	end;
 
 	return SpecializationUtil.hasSpecialization(Motorized, specializations) and SpecializationUtil.hasSpecialization(Fillable, specializations);
 end;
-function pump:load(xmlFile)	
+function Pump:load(xmlFile)	
 	--Fuel Indicator
 	self.count = 0;
 	self.percent = 0;
@@ -55,34 +55,34 @@ function pump:load(xmlFile)
 		setVisibility(self.fuelIndicators[j], false);
 	end;
 	
-	pump.isTurnedOn = false;
+	Pump.isTurnedOn = false;
 	
 end;
 
-function pump:delete()
+function Pump:delete()
 end;
-function pump:readStream(streamId, connection)
+function Pump:readStream(streamId, connection)
 end;
-function pump:writeStream(streamId, connection)
+function Pump:writeStream(streamId, connection)
 end;
 
-function pump:mouseEvent(posX, posY, isDown, isUp, button)
+function Pump:mouseEvent(posX, posY, isDown, isUp, button)
 end;
-function pump:keyEvent(unicode, sym, modifier, isDown)
+function Pump:keyEvent(unicode, sym, modifier, isDown)
 end;
-function pump:update(dt)
+function Pump:update(dt)
 	if self.isClient then
-		if self:getIsActiveForInput() then
-			if InputBinding.hasEvent(InputBinding.PUMP_SWITCH) then
-				pump:setIsTurnedOn(not pump.isTurnedOn);
+		if self:getIsActiveForInput() and self.isMotorStarted then
+			if InputBinding.hasEvent(InputBinding.Pump_SWITCH) then
+				Pump:setIsTurnedOn(not Pump.isTurnedOn);
 			end;
 		end;
 	end;
-
+	
 end;
-function pump:updateTick(dt)
+function Pump:updateTick(dt)
 		
-		if self.count > 0 and pump.isTurnedOn then
+		if self.count > 0 then
 -- TODO Change Fuel Indicator
 -- Attention Fuel Indicator only look to own filllevel not to fillevel of a trailer!
 			--self.fillLevel = Fillable.getFillLevel;
@@ -107,27 +107,29 @@ function pump:updateTick(dt)
 				end; 
 			end;
 		end;
+		
+		
 
 end;
 
-function pump:setIsTurnedOn(state)
-	pump.isTurnedOn = state;
+function Pump:setIsTurnedOn(state)
+	Pump.isTurnedOn = state;
 end;
 
-function pump:draw()
+function Pump:draw()
 	if self.isClient then
-		if pump.isTurnedOn then
-			g_currentMission:addHelpButtonText(string.format(g_i18n:getText("turn_off_PUMP"), self.typeDesc), InputBinding.PUMP_SWITCH);
+		if Pump.isTurnedOn then
+			g_currentMission:addHelpButtonText(string.format(g_i18n:getText("turn_off_Pump"), self.typeDesc), InputBinding.Pump_SWITCH);
 		else
-			g_currentMission:addHelpButtonText(string.format(g_i18n:getText("turn_on_PUMP"), self.typeDesc), InputBinding.PUMP_SWITCH);
+			g_currentMission:addHelpButtonText(string.format(g_i18n:getText("turn_on_Pump"), self.typeDesc), InputBinding.Pump_SWITCH);
 		end;
 	end;
 end;
-function pump:attachImplement(implement)
+function Pump:attachImplement(implement)
 end;
-function pump:detachImplement(implementIndex)
+function Pump:detachImplement(implementIndex)
 end;
-function pump:onEnter()
+function Pump:onEnter()
 end;
-function pump:onLeave()
+function Pump:onLeave()
 end;
