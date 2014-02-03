@@ -2,8 +2,8 @@
 -- 
 --
 -- @author Grisu118
--- @date 02/01/14
--- @version v0.91
+-- @date 03/02/14
+-- @version v0.92
 -- @Descripion: Readme you can find there: https://github.com/Grisu118/Scripts
 -- @web: http://grisu118.ch or http://vertexdezign.de
 -- free for noncommerical-usage

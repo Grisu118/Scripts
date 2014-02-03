@@ -1,8 +1,8 @@
 -- Pump for Firetrucks
 --
 -- @author  Grisu118
--- @date  07/01/2014
--- @version v0.1
+-- @date  03/02/2014
+-- @version v0.2
 -- @Descripion: Readme you can find there: https://github.com/Grisu118/Scripts
 -- @web: http://grisu118.ch or http://vertexdezign.de
 -- Copyright (C) Grisu118, All Rights Reserved.
